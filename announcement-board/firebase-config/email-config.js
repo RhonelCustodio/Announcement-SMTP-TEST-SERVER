@@ -25,7 +25,7 @@
 export const emailJsConfig = {
   publicKey: "pF6AWbQXGD9MJtIJk",
   serviceId: "service_rxondnn",
-  templateId: "template_vjuienl",
+  templateId: "template_terbnak",
 
   /** Where the "new announcement" notification is delivered. */
   recipientEmail: "mprvtccntlocked@gmail.com",
