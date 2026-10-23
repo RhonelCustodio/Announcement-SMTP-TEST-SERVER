@@ -19,23 +19,24 @@ Firebase is loaded from the version pinned in the brief:
 ## 1. File map
 
 ```
-announcement-board/
+Announement/
 ├── index.html                      board + composer + admin PIN dialog
-├── css/styles.css                  cork-board theme (no image assets)
-├── js/
-│   ├── app.js                      UI, filters, admin gate, wiring
-│   ├── email.js                    EmailJS notify (SDK → REST fallback)
-│   ├── store-firestore.js          reads/writes for the live board
-│   └── store-local.js              same interface on localStorage (demo mode)
-├── firebase.js                     ← your snippet: initializeApp + getFirestore
-├── firebase-config/
-│   ├── firebase-config.js          ⚠️ paste Firebase keys here
-│   ├── email-config.js             ⚠️ paste EmailJS ids here
-│   └── site-config.js              org name, categories, admin PIN
-├── firestore.rules                 production rules (public read / admin write)
-├── firestore.rules.open            starter rules (everything open — testing)
-├── assets/                         the two screenshots above
-└── firebase.json                   `firebase deploy` config
+└── announcement-board/
+    ├── css/styles.css              cork-board theme (no image assets)
+    ├── js/
+    │   ├── app.js                  UI, filters, admin gate, wiring
+    │   ├── email.js                EmailJS notify (SDK → REST fallback)
+    │   ├── store-firestore.js      reads/writes for the live board
+    │   └── store-local.js          same interface on localStorage (demo mode)
+    ├── firebase.js                 ← your snippet: initializeApp + getFirestore
+    ├── firebase-config/
+    │   ├── firebase-config.js      ⚠️ paste Firebase keys here
+    │   ├── email-config.js         ⚠️ paste EmailJS ids here
+    │   └── site-config.js          org name, categories, admin PIN
+    ├── firestore.rules             production rules (public read / admin write)
+    ├── firestore.rules.open        starter rules (everything open — testing)
+    ├── assets/                     the two screenshots above
+    └── firebase.json               `firebase deploy` config
 ```
 
 `firebase.js` is imported **dynamically** by `app.js` only once your keys are
@@ -47,9 +48,9 @@ Because the code uses native ES modules it must be served over http (double
 clicking `index.html` = `file://` = blocked by CORS).
 
 ```bash
-cd announcement-board
+cd ..
 python3 -m http.server 8000       # → http://localhost:8000
-# or: npx serve .   /   firebase serve --only hosting
+# or: npx serve .   /   firebase serve --only hosting (from announcement-board)
 ```
 
 Out of the box you'll see **DEMO MODE** — three sample posters, saved in
