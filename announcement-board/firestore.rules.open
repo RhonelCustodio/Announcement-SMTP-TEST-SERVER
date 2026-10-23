@@ -1,0 +1,20 @@
+rules_version = "2";
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Option B — OPEN BOARD (default while testing)
+//  Anyone with the URL can post, edit and delete. This matches the PIN-only
+//  admin gate in the site, so it works out of the box with EmailJS.
+//  ⚠️ Do not leave this on a public URL you care about: strangers can wipe the
+//     board or spam your EmailJS quota. Move to firestore.rules (Option A) as
+//     soon as the site works.
+// ═══════════════════════════════════════════════════════════════════════════
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /announcements/{id} {
+      allow read, write: if true;
+    }
+    match /allowedAdmins/{uid} {
+      allow read, write: if false;
+    }
+  }
+}

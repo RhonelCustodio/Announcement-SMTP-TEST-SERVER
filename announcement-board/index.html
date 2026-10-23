@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Announcement Board</title>
+    <meta name="description" content="Public announcement board. Posters are stored in Cloud Firestore and every new notice is emailed out through EmailJS." />
+    <meta name="theme-color" content="#8a6a4b" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📌</text></svg>" />
+
+    <!-- Optional webfonts. The board falls back to system fonts if these fail. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./css/styles.css" />
+    <script type="module" src="./js/app.js"></script>
+  </head>
+
+  <body>
+    <div class="cork" aria-hidden="true"></div>
+
+    <header class="masthead">
+      <div class="masthead-row">
+        <div class="brand">
+          <span class="seal" aria-hidden="true">📌</span>
+          <div>
+            <p class="org" id="orgName">Student Council</p>
+            <h1 class="board-title" id="boardTitle">Announcement Board</h1>
+            <p class="tagline" id="tagline">All official notices — pinned here first.</p>
+          </div>
+        </div>
+
+        <div class="tools">
+          <label class="search">
+            <span aria-hidden="true">🔍</span>
+            <input id="search" type="search" placeholder="Search notices…" autocomplete="off" />
+          </label>
+          <button class="btn btn-ghost" id="adminBtn" type="button">🔒 Admin</button>
+        </div>
+      </div>
+
+      <nav class="chips" id="chips" aria-label="Filter by category"></nav>
+
+      <div class="statusbar">
+        <span class="pill" id="statusPill">booting…</span>
+        <span class="spacer"></span>
+        <button class="linkbtn" id="expiredNote" type="button" hidden></button>
+        <span class="count" id="count">0 posters</span>
+      </div>
+
+      <!-- Admin-only toolbar -->
+      <div class="adminstrip" id="adminStrip" hidden>
+        <span class="adminstrip-label">Admin panel</span>
+        <button class="btn btn-solid" id="newBtn" type="button">＋ New announcement</button>
+        <button class="btn btn-quiet" id="testEmailBtn" type="button">📧 Test email</button>
+        <button class="btn btn-quiet" id="purgeBtn" type="button">🧹 Purge old</button>
+        <span class="spacer"></span>
+        <span class="hint">New notices are emailed to <b>mprvtccntlocked@gmail.com</b> via EmailJS</span>
+        <button class="btn btn-quiet" id="signoutBtn" type="button">🔒 Lock</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="board" id="board" aria-live="polite"></section>
+
+      <div class="loading" id="loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Reading <code>announcements</code> from Firestore…</span>
+      </div>
+
+      <div class="empty" id="empty" hidden>
+        <div class="empty-paper">
+          <span class="tack" aria-hidden="true"></span>
+          <h2 id="emptyTitle">Nothing pinned yet</h2>
+          <p id="emptyText"></p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="foot">
+      <p id="footerNote">Posted announcements are emailed to the office automatically.</p>
+      <p class="muted">Announcements live in Cloud Firestore · notifications via EmailJS</p>
+    </footer>
+
+    <!-- ───────────────────────── composer ───────────────────────── -->
+    <dialog class="modal" id="composer">
+      <form class="sheet" id="composerForm" method="dialog" novalidate>
+        <header class="sheet-head">
+          <h2 id="composerTitle">New announcement</h2>
+          <button class="x" type="button" id="closeComposer" aria-label="Close">✕</button>
+        </header>
+
+        <label class="field">
+          <span>Headline <i>*</i></span>
+          <input id="f-title" name="title" maxlength="90" placeholder="Summer Supply Sale — 3 days only" required />
+        </label>
+
+        <label class="field">
+          <span>Body <i>*</i></span>
+          <textarea id="f-body" name="body" rows="6" maxlength="1200" placeholder="What, where, when, who to contact…" required></textarea>
+        </label>
+
+        <div class="grid3">
+          <label class="field">
+            <span>Category</span>
+            <select id="f-category" name="category"></select>
+          </label>
+          <label class="field">
+            <span>Priority</span>
+            <select id="f-priority" name="priority"></select>
+          </label>
+          <label class="field">
+            <span>Posted by</span>
+            <input id="f-author" name="author" maxlength="40" placeholder="Office / club / store" />
+          </label>
+        </div>
+
+        <div class="grid3">
+          <label class="field">
+            <span>Event date</span>
+            <input id="f-eventDate" name="eventDate" type="date" />
+          </label>
+          <label class="field">
+            <span>Unpin / expire on</span>
+            <input id="f-expiresAt" name="expiresAt" type="date" />
+          </label>
+          <div class="field">
+            <span>Options</span>
+            <label class="check"><input id="f-pinned" type="checkbox" /> Pin to the top of the board</label>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <label class="field">
+            <span>Poster image URL <em>(optional)</em></span>
+            <input id="f-imageUrl" name="imageUrl" type="url" placeholder="https://…" />
+          </label>
+          <label class="field">
+            <span>“Details” link <em>(optional)</em></span>
+            <input id="f-link" name="link" type="url" placeholder="https://…" />
+          </label>
+        </div>
+        <div class="imgpreview" id="imgPreview"></div>
+
+        <label class="check check-email">
+          <input id="f-notify" type="checkbox" checked />
+          <span>Email <b>mprvtccntlocked@gmail.com</b> once this is saved to Firestore</span>
+        </label>
+
+        <footer class="sheet-foot">
+          <button class="btn btn-quiet" type="button" id="cancelComposer" onclick="this.closest('dialog').close()">Cancel</button>
+          <button class="btn btn-solid" type="submit" id="submitBtn">Post to board</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <!-- ───────────────────────── admin login ───────────────────────── -->
+    <dialog class="modal modal-sm" id="login">
+      <form class="sheet" id="loginForm">
+        <header class="sheet-head">
+          <h2>Admin access</h2>
+          <button class="x" type="button" id="closeLogin" aria-label="Close">✕</button>
+        </header>
+        <label class="field">
+          <span>PIN</span>
+          <input id="pinInput" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••••••" />
+        </label>
+        <p class="error" id="loginError"></p>
+        <p class="muted small">Client-side gate only — it hides the buttons. Real protection is your Firestore security rules (README §4).</p>
+        <footer class="sheet-foot">
+          <span></span>
+          <button class="btn btn-solid" type="submit">Unlock</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+  </body>
+</html>
